@@ -1,0 +1,7 @@
+--model=/{{.YYYY}}/{{.YYYY}}.{{.MM}}/{{.YYYY}}.{{.MM}}.{{.DD}}
+--dryrun
+--delete .@__thumb
+/home/jfcassan/40-Photos
+/home/jfcassan/40-Photos/2016
+#/media/jfcassan/HDD 1TB/tmp/photos
+#/media/jfcassan/HDD 1TB/tmp/photos/2016/2016-12-08

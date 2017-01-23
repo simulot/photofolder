@@ -3,12 +3,11 @@ package main
 import (
 	"io/ioutil"
 	"log"
+	"os"
 	"path/filepath"
 	"sort"
 	"strings"
 	"sync"
-
-	"os"
 
 	"github.com/pkg/errors"
 )
@@ -64,6 +63,7 @@ func (a *appConfig) clean() {
 }
 
 func (a *appConfig) cleanPath(p string) {
+	// log.Println("check emptiness of", p)
 	d, err := ioutil.ReadDir(p)
 	dieOnError(errors.Wrap(err, "cleanPath"))
 	if len(d) == 0 {

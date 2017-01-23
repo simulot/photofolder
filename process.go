@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sync"
 	"sync/atomic"
 
 	"github.com/pkg/errors"
@@ -15,15 +16,19 @@ import (
 )
 
 func (a *appConfig) process(in chan *entryStruct) {
+	wg := sync.WaitGroup{}
 	w := worker.NewPool(8)
 	w.Run()
 	for e := range in {
 		e := e
+		wg.Add(1)
 		w.QueueJob(func() {
 			a.processEntry(e)
+			wg.Done()
 		})
 		atomic.AddInt64(&a.processedFiles, 1)
 	}
+	wg.Wait()
 	w.Quit()
 }
 
@@ -70,7 +75,6 @@ func (a *appConfig) delete(e *entryStruct) {
 	if err != nil {
 		log.Println(errors.Wrap(err, "Can't delete entry"))
 	}
-	// a.folderToBeChecked.add(filepath.Dir(a.fullName(e.path)))
 }
 
 func (a *appConfig) move(e *entryStruct, dest string) {

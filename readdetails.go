@@ -1,13 +1,17 @@
 package main
 
 import (
+	"bytes"
+	"image"
+	_ "image/gif"
+	_ "image/jpeg"
+	_ "image/png"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
 	"time"
-
-	"bytes"
 
 	"github.com/pkg/errors"
 	"github.com/rwcarlsen/goexif/exif"
@@ -64,17 +68,27 @@ func (e *entryStruct) readExif(a *appConfig) {
 	f, err := os.Open(a.fullName(e.path))
 	defer f.Close()
 	dieOnError(errors.Wrapf(err, "Can't process entry '%s'", e.FNAME()))
+	e.dateTaken = e.info.ModTime()
 	e.exif, err = exif.Decode(f)
 	if err == nil {
 		e.dateTaken, err = e.exif.DateTime()
-		if err == nil {
-			return
-		}
 		if !exif.IsTagNotPresentError(err) {
 			dieOnError(errors.Wrapf(err, "Can't readExif for '%s'", e.path))
 		}
+		if err != nil {
+			e.dateTaken = e.info.ModTime()
+		}
 	}
-	e.dateTaken = e.info.ModTime()
+	if a.deleteSmall {
+		f.Seek(0, 0)
+		config, _, err := image.DecodeConfig(f)
+		if err != nil {
+			log.Println(errors.Wrapf(err, "Read image config '%s'", e.path))
+			e.invalid = true
+		} else {
+			e.height, e.width = config.Height, config.Width
+		}
+	}
 }
 func (e *entryStruct) readMoov(a *appConfig) {
 	f, err := os.Open(a.fullName(e.path))
@@ -91,9 +105,19 @@ func (e *entryStruct) readMoov(a *appConfig) {
 	e.dateTaken = info.ModTime()
 }
 
+const minSize = 256 * 256
+
 func (e *entryStruct) toBeProcessed(a *appConfig) bool {
 	if e.invalid {
 		return true
+	}
+	if a.deleteSmall {
+		s := e.width * e.height
+		if s > 0 && s < minSize {
+			log.Printf("image %s (%dx%d) is too small", e.path, e.width, e.height)
+			e.invalid = true
+			return true
+		}
 	}
 	if len(e.rightPath) == 0 {
 		e.getRightPath(a)

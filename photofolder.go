@@ -17,12 +17,13 @@ type appConfig struct {
 	dryRun                       bool
 	checkedFiles, processedFiles int64
 	folderToBeChecked            *folderList
+	deletePatterns               []string
+	deleteSmall                  bool
 }
 
 func main() {
 	app := readConfig()
 	app.run()
-
 }
 
 func (a *appConfig) run() {

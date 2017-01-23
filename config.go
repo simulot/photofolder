@@ -4,6 +4,10 @@ import (
 	"os"
 	"text/template"
 
+	"github.com/pkg/errors"
+
+	"path/filepath"
+
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
@@ -11,25 +15,36 @@ const defaultTemplate = `/{{.YYYY}}/{{.YYYY}}.{{.MM}}/{{.YYYY}}.{{.MM}}.{{.DD}}`
 
 func readConfig() *appConfig {
 	conf := struct {
-		repository checkedPath
-		path       checkedPath
-		folderTpl  myTemplate
-		dryRun     bool
+		repository     checkedPath
+		path           checkedPath
+		folderTpl      myTemplate
+		deletePatterns []string
+		dryRun         bool
+		deleteSmall    bool
 	}{}
 	readTemplate(&conf.folderTpl, kingpin.Flag("model", "model for path").Default(defaultTemplate).Short('m'))
-	kingpin.Flag("dryrun", "don't touch files").Short('d').Default("true").BoolVar(&conf.dryRun)
+	kingpin.Flag("dryrun", "show actions to be done, but doesn't touch files").Short('d').Default("true").BoolVar(&conf.dryRun)
+	kingpin.Flag("delete", "to be deleted file patterns, like thumb*.* or picasa.ini").Default("Thumbs.db", "@__thumb", ".@__thumb").StringsVar(&conf.deletePatterns)
+	kingpin.Flag("delete-small", "delete small image smaller than 256x256 pixels").Default("false").BoolVar(&conf.deleteSmall)
 	readPath(&conf.repository, kingpin.Arg("repository", "media repository").Required())
-	readPath(&conf.path, kingpin.Arg("path", "path to be cleand "))
+	readPath(&conf.path, kingpin.Arg("path", "path to be cleaned, if empty, the whole repository is cleanned"))
 	kingpin.Parse()
 	if len(conf.path) == 0 {
 		conf.path = conf.repository
 	}
+	for _, d := range conf.deletePatterns {
+		_, err := filepath.Match(d, "test.tst")
+		dieOnError(errors.Wrapf(err, "Delete patterns '%s'", d))
+	}
+
 	return &appConfig{
 		path:              string(conf.path),
 		repository:        string(conf.repository),
 		folderTpl:         conf.folderTpl.Template,
 		dryRun:            conf.dryRun,
 		folderToBeChecked: newFolderList(),
+		deletePatterns:    conf.deletePatterns,
+		deleteSmall:       conf.deleteSmall,
 	}
 }
 

@@ -22,6 +22,7 @@ func readConfig() *appConfig {
 		dryRun         bool
 		deleteSmall    bool
 	}{}
+
 	readTemplate(&conf.folderTpl, kingpin.Flag("model", "model for path").Default(defaultTemplate).Short('m'))
 	kingpin.Flag("dryrun", "show actions to be done, but doesn't touch files").Short('d').Default("true").BoolVar(&conf.dryRun)
 	kingpin.Flag("delete", "to be deleted file patterns, like thumb*.* or picasa.ini").Default("Thumbs.db", "@__thumb", ".@__thumb").StringsVar(&conf.deletePatterns)

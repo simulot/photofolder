@@ -26,7 +26,7 @@ func readConfig() *appConfig {
 	kingpin.Flag("dryrun", "show actions to be done, but doesn't touch files").Short('d').Default("true").BoolVar(&conf.dryRun)
 	kingpin.Flag("delete", "to be deleted file patterns, like thumb*.* or picasa.ini").Default("Thumbs.db", "@__thumb", ".@__thumb").StringsVar(&conf.deletePatterns)
 	kingpin.Flag("delete-small", "delete small image smaller than 256x256 pixels").Default("false").BoolVar(&conf.deleteSmall)
-	readPath(&conf.repository, kingpin.Arg("repository", "media repository").Required())
+	readPath(&conf.repository, kingpin.Arg("repository", "media repository"))
 	readPath(&conf.path, kingpin.Arg("path", "path to be cleaned, if empty, the whole repository is cleanned"))
 	kingpin.Parse()
 	if len(conf.path) == 0 {

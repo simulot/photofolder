@@ -1,5 +1,5 @@
 --model=/{{.YYYY}}/{{.YYYY}}.{{.MM}}/{{.YYYY}}.{{.MM}}.{{.DD}}
---no-dryrun
+--dryrun
 --delete=@__thumb
 --delete=.@__thumb
 --delete=Thumbs.db

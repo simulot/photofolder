@@ -13,3 +13,4 @@
 /media/jfcassan/HDD 1TB/tmp/photos
 #/media/jfcassan/HDD 1TB/tmp/photos/2005
 #/media/jfcassan/HDD 1TB/tmp/photos/2016/2016-12-08
+C:\Users\eve\Pictures\Photos\JPGImages

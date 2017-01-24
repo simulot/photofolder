@@ -6,19 +6,18 @@ After several years of shooting photos everydays with several devices, my photo 
 * some copied,with a different names
 * some distinct photo have same name
 * unconsistent folder naming
-
 I wrote this utility in order to have a simple but proven 
 folder organisation :
 YEAR\YEAR.MONTH\YEAR.MONTH.DAY hierarchy based on taken date available in exif metadata when available.
 
 The utility scans the given folder. For each photo, it checks the path where it should be
-located. When it differs from the actual path, he moves it.
+located. When it differs from the actual path, it moves it.
 
 At the end of the process, empty folders are removed.
 
 # Usage
 
-`
+```
 usage: photofolder [<flags>] <repository> [<path>]
 
 Flags:
@@ -34,7 +33,7 @@ Flags:
 Args:
   <repository>  media repository
   [<path>]      path to be cleaned, if empty, the whole repository is cleanned
-`
+```
 
 
 ## Settings

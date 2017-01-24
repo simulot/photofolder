@@ -12,24 +12,22 @@ import (
 	"sync/atomic"
 
 	"github.com/pkg/errors"
-	"github.com/simulot/logfinder/logparser/worker"
 )
 
 func (a *appConfig) process(in chan *entryStruct) {
 	wg := sync.WaitGroup{}
-	w := worker.NewPool(8)
-	w.Run()
-	for e := range in {
-		e := e
-		wg.Add(1)
-		w.QueueJob(func() {
-			a.processEntry(e)
+	wg.Add(8)
+	for i := 0; i < 8; i++ {
+		go func() {
+			for job := range in {
+				a.processEntry(job)
+				atomic.AddInt64(&a.processedFiles, 1)
+			}
 			wg.Done()
-		})
-		atomic.AddInt64(&a.processedFiles, 1)
+		}()
 	}
+
 	wg.Wait()
-	w.Quit()
 }
 
 func (a *appConfig) processEntry(e *entryStruct) {

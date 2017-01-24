@@ -10,42 +10,31 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/pkg/errors"
 	"github.com/rwcarlsen/goexif/exif"
-	"github.com/simulot/logfinder/logparser/worker"
 	"github.com/simulot/photofolder/mov"
 )
 
 type entryProcessor struct {
 	a *appConfig
-	w *worker.Pool
 }
 
 // run emits items when desired path differs from actual path
 func (a *appConfig) readDetails(in chan *entryStruct) chan *entryStruct {
-	w := worker.NewPool(8)
+
 	out := make(chan *entryStruct, 0)
-	w.Run()
-	go func() {
-		wg := sync.WaitGroup{}
-		for e := range in {
-			wg.Add(1)
-			e := e
-			w.QueueJob(func() {
+	for i := 0; i < 8; i++ {
+		go func() {
+			for e := range in {
 				e.readInfo(a)
 				if e.toBeProcessed(a) {
 					out <- e
 				}
-				wg.Done()
-			})
-		}
-		wg.Wait()
-		close(out)
-		w.Quit()
-	}()
+			}
+		}()
+	}
 	return out
 }
 
